@@ -22,6 +22,3 @@ Wed Nov 30 2022 22:06:46 GMT-0500 (Nordamerikanische Ostküsten-Normalzeit)
 url: /documentation 
 Wed Nov 30 2022 22:06:49 GMT-0500 (Nordamerikanische Ostküsten-Normalzeit) 
 
-url: /house 
-Wed Nov 30 2022 22:07:01 GMT-0500 (Nordamerikanische Ostküsten-Normalzeit) 
-
