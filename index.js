@@ -83,7 +83,7 @@ let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
 });
 
 // middleware
-app.use(morgan("combined", { stream: logStream }));
+app.use(morgan("common", { stream: logStream }));
 app.use(express.static("public"));
 
 //error handling middleware

@@ -1,8 +1,0 @@
-::ffff:127.0.0.1 - - [02/Dec/2022:23:33:57 +0000] "GET /documentation.html HTTP/1.1" 200 477 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:33:57 +0000] "GET /css/styles.css HTTP/1.1" 200 57 "http://localhost:5000/documentation.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:34:22 +0000] "GET /movies HTTP/1.1" 200 1103 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:36:36 +0000] "GET / HTTP/1.1" 200 35 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:36:42 +0000] "GET /documentation.html HTTP/1.1" 200 477 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:36:42 +0000] "GET /css/styles.css HTTP/1.1" 200 57 "http://localhost:5000/documentation.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:36:47 +0000] "GET /movies HTTP/1.1" 200 1103 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
-::ffff:127.0.0.1 - - [02/Dec/2022:23:36:50 +0000] "GET /movies HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:107.0) Gecko/20100101 Firefox/107.0"
