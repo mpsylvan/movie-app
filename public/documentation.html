@@ -10,7 +10,156 @@
   <body>
     <div class="container">
       <h3>Movie API</h3>
-      <p>REST API for movie search, collections and favorites.</p>
+      <div class="objective">
+        <p>
+          Objective: A REST API serving requests about movie data. The API will
+          handle client requests for specific movie data, genre collections,
+          film directors, including their latest releases and their
+          filmographies. The Client will also be able to generate personal
+          accounts where they can create and edit lists of favorite films and
+          directors and also have access to a concise account deletion flow.
+        </p>
+      </div>
+      <table class="endpoints-requests-responses">
+        <thead>
+          <h3>Movie API request-response cycle</h3>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>API Function</th>
+            <th>Request Body</th>
+            <th>Response Body</th>
+          </tr>
+          <tr>
+            <td class="http-get">GET</td>
+            <td class="endpoint">/movies</td>
+            <td class="function">return complete list of movies</td>
+            <td class="req-body">none</td>
+            <td class="res-body">JSON array of all movies</td>
+          </tr>
+          <tr>
+            <td class="http-get">GET</td>
+            <td class="endpoint">/movies<span>/:title</span></td>
+            <td class="function">return single movie's data</td>
+
+            <td class="req-body">none</td>
+            <td class="res-body">
+              JSON data object of 1 movie filtered by title parameter:
+              <hr />
+              <ul>
+                <li>"name":"Batman"</li>
+                <li>"director":"Matt Reeves</li>
+                <li>"releaseYear":"2022"</li>
+                <li>"genre":"["drama", "superhero"]"</li>
+                <li>"studio":"Warner Bros"</li>
+                <li>"country":"us"</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td class="http-get">GET</td>
+            <td class="endpoint">/directors</td>
+            <td class="function">return complete list of directors</td>
+
+            <td class="req-body">none</td>
+            <td class="res-body">JSON array of all directors</td>
+          </tr>
+          <tr>
+            <td class="http-get">GET</td>
+            <td class="endpoint">/directors<span>/:name</span></td>
+            <td class="function">return single director's data</td>
+            <td class="req-body">none</td>
+            <td class="res-body">
+              JSON data object of 1 director filtered by name parameter:
+              <hr />
+              <ul>
+                <li>"name": "David Lowery"</li>
+                <li>"latestFilm: "The Green Knight"</li>
+                <li>"countryOrigin": "US"</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td class="http-get">GET</td>
+            <td class="endpoint">/genres</td>
+            <td class="function">return complete list of genres</td>
+
+            <td class="req-body">none</td>
+            <td class="res-body">JSON array of all genres</td>
+          </tr>
+          <tr>
+            <td class="http-get">GET</td>
+            <td class="endpoint">/genres<span>/:type</span></td>
+            <td class="function">return single genre's data</td>
+
+            <td class="req-body">none</td>
+            <td class="res-body">
+              JSON data object descrbing 1 genre filtered by type parameter
+            </td>
+          </tr>
+          <tr>
+            <td class="http-post">POST</td>
+            <td class="endpoint">/users</td>
+            <td class="function">register a new user account</td>
+            <td class="req-body">
+              JSON object containing data for new account to add to database:
+              <hr />
+              <ul>
+                <li>"name" : "Jill Smith"</li>
+                <li>"username" : "jillLovesMovies"</li>
+                <li>"email" : "jill@gmail.com"</li>
+                <li>"password" : "password123"</li>
+              </ul>
+            </td>
+            <td class="res-body">
+              JSON object containing the data of the added account and a success
+              message:
+              <hr />
+              <ul>
+                <li>"message" : "account successfully created"</li>
+                <li>"name" : "Jill Smith"</li>
+                <li>"username" : "jillLovesMovies"</li>
+                <li>"email" : "jill@gmail.com"</li>
+                <li>"password" : "password123"</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td class="http-put">PUT</td>
+            <td class="endpoint">/users<span>/:username</span></td>
+            <td class="function">update user information</td>
+            <td class="req-body">none</td>
+            <td class="res-body">
+              Username successfully updated text response
+            </td>
+          </tr>
+          <tr>
+            <td class="http-post">POST</td>
+            <td class="endpoint">
+              /users<span>/:username</span>/favorites<span>/:movie</span>
+            </td>
+            <td class="function">add a movie to favorites list</td>
+            <td class="req-body">none</td>
+            <td class="res-body">Movie added to favorites text response</td>
+          </tr>
+          <tr>
+            <td class="http-delete">DELETE</td>
+            <td class="endpoint">/users/favorites<span>/:title</span></td>
+            <td class="function">remove a movie from favorites list</td>
+            <td class="req-body">none</td>
+            <td class="res-body">Movie removed from list text response.</td>
+          </tr>
+          <tr>
+            <td class="http-delete">DELETE</td>
+            <td class="endpoint">/users<span>/:username</span></td>
+            <td class="function">delete user account</td>
+            <td class="req-body">none</td>
+            <td class="res-body">User account deleted text response</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </body>
 </html>
