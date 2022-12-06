@@ -1,4 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
 body {
+  font: normal normal 16px "Roboto", sans-serif;
   display: flex;
   justify-content: center;
+  background: #2a2a2f;
+  color: #b2b2b2;
+}
+
+.container {
+  text-align: center;
+  width: 75%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.objective {
+  width: 50%;
+  min-width: 200px;
+  text-align: center;
+  border: 3px solid black;
+}
+span {
+  color: #47c;
+}
+.endpoint {
+  font-weight: 600;
+}
+.http-get {
+  color: #4c8;
+}
+
+.http-post {
+  color: #c84;
+}
+
+.http-put {
+  color: rgb(110, 56, 185);
+}
+.http-delete {
+  color: #d33;
+}
+tr {
+  text-align: center;
+}
+td {
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 3px;
+}
+li {
+  list-style: none;
+}
+ul {
+  padding: 0;
 }
