@@ -93,20 +93,6 @@ app.get("/directors/:name", (req, res) => {
     .catch((err) => res.status(500).send(`error: ${err}`));
 });
 
-//get all users
-app.get("/users", (req, res) => {
-  Users.find()
-    .then((users) => res.status(201).json(users))
-    .catch((err) => res.status(500).send("Error:" + err));
-});
-
-//get a user by username
-app.get("/users/:username", (req, res) => {
-  Users.findOne({ username: req.params.username })
-    .then((user) => res.status(201).send(`Oh hello, ${user.username}`))
-    .catch((err) => res.status(500).json({ message: err }));
-});
-
 // add new user
 app.post("/users", (req, res) => {
   Users.findOne({ username: req.body.username })
