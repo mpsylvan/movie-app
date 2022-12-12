@@ -29,9 +29,26 @@ let userSchema = mongoose.Schema({
   birthdate: Date,
   favoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
 });
+
+let directorSchema = mongoose.Schema({
+  name: { type: String, required: true },
+  bio: { type: String, required: true },
+  nationality: String,
+  dateOfBirth: { type: Date, required: true },
+});
+
+let genreSchema = mongoose.Schema({
+  name: { type: String, required: true },
+  description: String,
+});
+
 // create create the models, passing in the model name (this gets pluralized and lowercased), and the schema that that model will follow.
 let Movie = mongoose.model("Movie", movieSchema); //this will generate as db.movies
 let User = mongoose.model("User", userSchema); // this will generate as db.users
+let Director = mongoose.model("Director", directorSchema); // generate as db.directors
+let Genre = mongoose.model("Genre", genreSchema); // generate as db.genres
 
 module.exports.Movie = Movie;
 module.exports.User = User;
+module.exports.Director = Director;
+module.exports.Genre = Genre;
