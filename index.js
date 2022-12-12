@@ -9,6 +9,8 @@ const Models = require("./models.js");
 
 const Movies = Models.Movie;
 const Users = Models.User;
+const Directors = Models.Director;
+const Genres = Models.Genre;
 
 mongoose.connect("mongodb://localhost:27017/SceneStealer", {
   useNewUrlParser: true,
@@ -68,7 +70,12 @@ app.get("/movies/:name", (req, res) => {
       res.status(404).send("error: " + err);
     });
 });
-
+// list all genres
+app.get("/genres", (req, res) => {
+  Genres.find()
+    .then((genres) => res.status(200).json(genres))
+    .catch((err) => res.status(500).send("Error:" + err));
+});
 // get single genre data
 app.get("/genres/:genre", (req, res) => {
   Movies.findOne({ "genre.name": req.params.genre }).then((movie) => {
@@ -79,7 +86,12 @@ app.get("/genres/:genre", (req, res) => {
     }
   });
 });
-
+//get all directors
+app.get("/directors", (req, res) => {
+  Directors.find()
+    .then((directors) => res.status(200).json(directors))
+    .catch((err) => res.status(500).send("Error: " + err));
+});
 // get single director data
 app.get("/directors/:name", (req, res) => {
   Movies.findOne({ "director.name": req.params.name })
@@ -175,13 +187,19 @@ app.put("/users/:username", (req, res) => {
 app.post("/users/:username/favorites/:movieID", (req, res) => {
   Users.findOneAndUpdate(
     { username: req.params.username },
-    { $push: { favoriteMovies: req.params.movieID } },
+    { $addToSet: { favoriteMovies: req.params.movieID } },
     { new: true }
   )
     .then((updatedUser) =>
       res.status(201).send(`${updatedUser.username}'s favorites updated.`)
     )
     .catch((err) => res.status(500).send("error:" + err));
+});
+
+app.get("", (req, res) => {
+  Directors.find()
+    .then((directors) => res.status(200).json(directors))
+    .catch((err) => res.status(500).send("error: " + err));
 });
 
 // remove a movie from favorites list.
