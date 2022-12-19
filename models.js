@@ -1,4 +1,5 @@
 const mongoose = require("mongoose"); // requiring the mongoose module into your file.
+const bcrypt = require("bcrypt");
 
 let movieSchema = mongoose.Schema({
   // calling the Schema constructor on the mognoose module, and passing in the schema/ template with data types, and requirements.
@@ -20,15 +21,25 @@ let movieSchema = mongoose.Schema({
   },
   feature: Boolean,
 });
-
+// User schema declaration
 let userSchema = mongoose.Schema({
-  name: { type: String, required: true },
+  name: String,
   email: { type: String, required: true },
   password: { type: String, required: true },
   username: { type: String, required: true },
   birthdate: Date,
   favoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
 });
+
+// static method attached to the User schema that hashes the password of each instance of User document.
+userSchema.statics.hashPassword = (password) => {
+  return bcrypt.hashSync(password, 10); // the string to be hashed and the salt
+};
+
+// instance method compares an inputted password with the User document password field that is in context.
+userSchema.methods.validatePassword = function (password) {
+  return bcrypt.compareSync(password, this.password);
+};
 
 let directorSchema = mongoose.Schema({
   name: { type: String, required: true },
