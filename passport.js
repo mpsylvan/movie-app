@@ -9,22 +9,33 @@ let ExtractJWT = passportJWT.ExtractJwt; //
 
 // defines basic HTTP auth for logins.
 passport.use(
-  new LocalStrategy(
+  // passport registers this strategy, THEN it can be employed as middleware
+  new LocalStrategy( // configuring the  local strategy
     {
       username: "Username",
       password: "Password",
     },
+    // 'verify' function that takes in credentials and a callback
     (username, password, callback) => {
       console.log(username + " " + password);
       Users.findOne({ username: username }, (err, user) => {
         if (err) {
           console.log(err);
-          return callback(err);
+          return callback(err); // internal server issue, callback accepts err argument.
         }
         if (!user) {
           console.log("incorrect username");
+          //invalidity in the entry, callback takes boolean false
           return callback(null, false, {
-            message: "Incorrect username or password",
+            message: "Incorrect username",
+          });
+        }
+
+        // validate password declared on all instances of User, in models.js
+        if (!user.validatePassword(password)) {
+          console.log("invalid password");
+          return callback(null, false, {
+            message: "Invalid password",
           });
         }
 
@@ -36,7 +47,8 @@ passport.use(
 );
 
 passport.use(
-  new JWTStrategy(
+  //passport registers this strategy, allowing all restricted routes in index.js to employ it as middleware
+  new JWTStrategy( // configuring a JWT strategy
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
       secretOrKey: "your_jwt_secret",
