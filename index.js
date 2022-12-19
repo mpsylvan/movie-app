@@ -2,7 +2,10 @@ const express = require("express"),
   path = require("path"),
   morgan = require("morgan"),
   bodyParser = require("body-parser"),
-  fs = require("fs");
+  fs = require("fs"),
+  cors = require("cors");
+
+const { check, validationResult } = require("express-validator");
 
 const mongoose = require("mongoose");
 const Models = require("./models.js");
@@ -18,23 +21,39 @@ mongoose.connect("mongodb://localhost:27017/SceneStealer", {
 });
 
 const app = express();
-const port = 8080;
 
 // creates a write stream for morgan to log each request to the server in logs file.
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
-
-// middleware used in  handlers
-app.use(morgan("common", { stream: logStream }));
-app.use(express.static("public"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
+// implement cors before authorization/authentication
+let allowedDomains = [`http://localhost${port}/`];
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) {
+        return cb(null, false);
+      }
+      if (allowedDomains.indexOf(origin) === -1) {
+        let message =
+          "The CORs policy for this application does not allow access from this origin " +
+          origin;
+        cb(new Error(message), false);
+      }
+      return cb(null, true);
+    },
+  })
+);
 // passport strategies and /login JWT generation
 let auth = require("./auth.js")(app);
 const passport = require("passport");
 require("./passport");
+
+// route middleware
+app.use(morgan("common", { stream: logStream }));
+app.use(express.static("public"));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //error handling middleware
 app.use((err, req, res, next) => {
@@ -140,34 +159,53 @@ app.get(
 );
 
 // add new user
-app.post("/users", (req, res) => {
-  Users.findOne({ username: req.body.username })
-    .then((user) => {
-      if (user) {
-        res.status(400).send(`'${req.body.username}' already exists.`);
-      } else {
-        Users.create({
-          name: req.body.name,
-          email: req.body.email,
-          password: req.body.password,
-          username: req.body.username,
-          birthdate: req.body.birthdate,
-        })
-          .then((user) => {
-            res.status(201).json({
-              message: "Account successfully created",
-              user: user,
-            });
+app.post(
+  "/users",
+  [
+    check("username", "username is required").isLength({ min: 5 }),
+    check(
+      "username",
+      "username can only be made of letters and numbers"
+    ).isAlphanumeric(),
+    check("password", "password is required").not().isEmpty(),
+    check("email", "valid email is required").isEmail(),
+  ],
+  (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    let hashedPassword = Users.hashPassword(req.body.password); //  hashed form of password field of req body, static method declared in models.js
+    Users.findOne({ username: req.body.username })
+      .then((user) => {
+        if (user) {
+          res.status(400).send(`'${req.body.username}' already exists.`);
+        } else {
+          Users.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: hashedPassword, //  stores the hashed form
+            username: req.body.username,
+            birthdate: req.body.birthdate,
           })
-          .catch((error) => {
-            res.status(500).send("Error: " + error);
-          });
-      }
-    })
-    .catch((error) => {
-      res.status(500).send("Error: " + error);
-    });
-});
+            .then((user) => {
+              res.status(201).json({
+                message: "Account successfully created",
+                user: user,
+              });
+            })
+            .catch((error) => {
+              res.status(500).send("Error: " + error);
+            });
+        }
+      })
+      .catch((error) => {
+        res.status(500).send("Error: " + error);
+      });
+  }
+);
 
 // delete a user
 app.delete(
@@ -270,6 +308,7 @@ app.put(
   }
 );
 
-app.listen(port, () => {
+const port = process.env.PORT || 8080;
+app.listen(port, "0.0.0.0", () => {
   console.log(`listening on ${port}`);
 });
