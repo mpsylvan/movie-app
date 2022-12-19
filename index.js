@@ -27,23 +27,9 @@ let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
 // implement cors before authorization/authentication
-let allowedDomains = [`http://localhost${port}/`];
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) {
-        return cb(null, false);
-      }
-      if (allowedDomains.indexOf(origin) === -1) {
-        let message =
-          "The CORs policy for this application does not allow access from this origin " +
-          origin;
-        cb(new Error(message), false);
-      }
-      return cb(null, true);
-    },
-  })
-);
+// let allowedDomains = [`http://localhost8080/`];
+app.use(cors());
+
 // passport strategies and /login JWT generation
 let auth = require("./auth.js")(app);
 const passport = require("passport");
