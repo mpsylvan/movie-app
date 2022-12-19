@@ -15,12 +15,18 @@ const Users = Models.User;
 const Directors = Models.Director;
 const Genres = Models.Genre;
 
-mongoose.connect("mongodb://localhost:27017/SceneStealer", {
+const app = express();
+const port = process.env.PORT || 8080;
+
+// mongoose.connect("mongodb://localhost:27017/SceneStealer", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+mongoose.connect(process.env.CONNECTION_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-
-const app = express();
 
 // creates a write stream for morgan to log each request to the server in logs file.
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
@@ -309,7 +315,6 @@ app.put(
   }
 );
 
-const port = process.env.PORT || 8080;
 app.listen(port, "0.0.0.0", () => {
   console.log(`listening on ${port}`);
 });
