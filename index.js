@@ -216,7 +216,22 @@ app.delete(
 app.put(
   "/users/:username",
   passport.authenticate("jwt", { session: false }),
+  [
+    check("username", "username is required").isLength({ min: 5 }),
+    check(
+      "username",
+      "username can only be made of letters and numbers"
+    ).isAlphanumeric(),
+    check("password", "password is required").not().isEmpty(),
+    check("email", "valid email is required").isEmail(),
+  ],
   (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
     Users.findOneAndUpdate(
       { username: req.params.username },
       {
