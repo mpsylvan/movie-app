@@ -12,13 +12,13 @@ passport.use(
   // passport registers this strategy, THEN it can be employed as middleware
   new LocalStrategy( // configuring the  local strategy
     {
-      username: "Username",
-      password: "Password",
+      Username: "Username",
+      Password: "Password",
     },
     // 'verify' function that takes in credentials and a callback
     (username, password, callback) => {
       console.log(username + " " + password);
-      Users.findOne({ username: username }, (err, user) => {
+      Users.findOne({ Username: username }, (err, user) => {
         if (err) {
           console.log(err);
           return callback(err); // internal server issue, callback accepts err argument.
