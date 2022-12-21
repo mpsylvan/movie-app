@@ -32,8 +32,8 @@ mongoose.connect(process.env.CONNECTION_URI, {
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
-// implement cors before authorization/authentication
-// let allowedDomains = [`http://localhost8080/`];
+
+// enables CORs across all domains
 app.use(cors());
 
 // passport strategies and /login JWT generation
@@ -86,7 +86,7 @@ app.get(
   "/movies/:name",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Movies.findOne({ name: req.params.name })
+    Movies.findOne({ Name: req.params.name })
       .then((movie) => {
         if (!movie) {
           res.status(400).send(`no movie named ${req.params.name}`);
@@ -114,11 +114,11 @@ app.get(
   "/genres/:genre",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Movies.findOne({ "genre.name": req.params.genre }).then((movie) => {
-      if (!movie) {
+    Genres.findOne({ Name: req.params.genre }).then((genre) => {
+      if (!genre) {
         res.status(404).send("genre not found");
       } else {
-        res.status(201).json(movie.genre);
+        res.status(201).json(genre);
       }
     });
   }
@@ -138,17 +138,34 @@ app.get(
   "/directors/:name",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Movies.findOne({ "director.name": req.params.name })
+    Directors.findOne({ Name: req.params.name })
       .then((match) => {
         if (!match) {
           res.status(404).send(`Director named ${req.params.name} not found.`);
         } else {
-          res.status(201).json(match.director);
+          res.status(201).json(match);
         }
       })
       .catch((err) => res.status(500).send(`error: ${err}`));
   }
 );
+//get all users
+app.get(
+  "/users",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Users.find()
+      .then((users) => res.status(201).json(users))
+      .catch((err) => res.send("error: " + err));
+  }
+);
+// get user by name
+app.get("/users/:username", (req, res) => {
+  passport.authenticate("jwt", { session: false }),
+    Users.findOne({ Username: req.params.username })
+      .then((user) => res.json(user))
+      .catch((err) => res.send("error: " + err));
+});
 
 // add new user
 app.post(
@@ -170,17 +187,16 @@ app.post(
     }
 
     let hashedPassword = Users.hashPassword(req.body.password); //  hashed form of password field of req body, static method declared in models.js
-    Users.findOne({ username: req.body.username })
+    Users.findOne({ Username: req.body.username })
       .then((user) => {
         if (user) {
           res.status(400).send(`'${req.body.username}' already exists.`);
         } else {
           Users.create({
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword, //  stores the hashed form
-            username: req.body.username,
-            birthdate: req.body.birthdate,
+            Email: req.body.email,
+            Password: hashedPassword, //  stores the hashed form
+            Username: req.body.username,
+            Birthdate: req.body.birthdate,
           })
             .then((user) => {
               res.status(201).json({
@@ -240,13 +256,13 @@ app.put(
 
     let hashedPassword = Users.hashPassword(req.body.password);
     Users.findOneAndUpdate(
-      { username: req.params.username },
+      { Username: req.params.username },
       {
         $set: {
-          username: req.body.username,
-          email: req.body.email,
-          password: hashedPassword,
-          birthdate: req.body.birthdate,
+          Username: req.body.username,
+          Email: req.body.email,
+          Password: hashedPassword,
+          Birthdate: req.body.birthdate,
         },
       },
       { new: true },
@@ -277,12 +293,12 @@ app.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Users.findOneAndUpdate(
-      { username: req.params.username },
-      { $addToSet: { favoriteMovies: req.params.movieID } },
+      { Username: req.params.username },
+      { $addToSet: { FavoriteMovies: req.params.movieID } },
       { new: true }
     )
       .then((updatedUser) =>
-        res.status(201).send(`${updatedUser.username}'s favorites updated.`)
+        res.status(201).send(`${updatedUser.Username}'s favorites updated.`)
       )
       .catch((err) => res.status(500).send("error:" + err));
   }
@@ -300,8 +316,8 @@ app.put(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Users.findOneAndUpdate(
-      { username: req.params.username },
-      { $pull: { favoriteMovies: req.params.movieID } },
+      { Username: req.params.username },
+      { $pull: { FavoriteMovies: req.params.movieID } },
       { new: true },
       (err, updatedUser) => {
         if (err) {
@@ -309,7 +325,7 @@ app.put(
         } else {
           res
             .status(200)
-            .send(`Movie deleted from ${req.params.username}'s favorites.`);
+            .send(`Movie deleted from ${updatedUser.Username}'s favorites.`);
         }
       }
     );
