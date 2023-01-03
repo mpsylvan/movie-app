@@ -12,8 +12,8 @@ passport.use(
   // passport registers this strategy, THEN it can be employed as middleware
   new LocalStrategy( // configuring the  local strategy
     {
-      usernameField: "Username",
-      passwordField: "Password",
+      usernameField: "username",
+      passwordField: "password",
     },
     // 'verify' function that takes in credentials and a callback
     (username, password, callback) => {
