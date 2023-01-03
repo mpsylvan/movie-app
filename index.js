@@ -172,7 +172,7 @@ app.post(
     check("Username", "username is required").isLength({ min: 5 }),
     check(
       "Username",
-      "username can only be made of letters and numbers"
+      "Username can only be made of letters and numbers"
     ).isAlphanumeric(),
     check("Password", "password is required").not().isEmpty(),
     check("Email", "valid email is required").isEmail(),
@@ -184,17 +184,17 @@ app.post(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    let hashedPassword = Users.hashPassword(req.body.password); //  hashed form of password field of req body, static method declared in models.js
-    Users.findOne({ Username: req.body.username })
+    let hashedPassword = Users.hashPassword(req.body.Password); //  hashed form of password field of req body, static method declared in models.js
+    Users.findOne({ Username: req.body.Username })
       .then((user) => {
         if (user) {
-          res.status(400).send(`'${req.body.username}' already exists.`);
+          res.status(400).send(`'${req.body.Username}' already exists.`);
         } else {
           Users.create({
-            Email: req.body.email,
+            Email: req.body.Email,
             Password: hashedPassword, //  stores the hashed form
-            Username: req.body.username,
-            Birthdate: req.body.birthdate,
+            Username: req.body.Username,
+            Birthdate: req.body.Birthdate,
           })
             .then((user) => {
               res.status(201).json({
@@ -252,15 +252,15 @@ app.put(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    let hashedPassword = Users.hashPassword(req.body.password);
+    let hashedPassword = Users.hashPassword(req.body.Password);
     Users.findOneAndUpdate(
       { Username: req.params.username },
       {
         $set: {
-          Username: req.body.username,
-          Email: req.body.email,
+          Username: req.body.Username,
+          Email: req.body.Email,
           Password: hashedPassword,
-          Birthdate: req.body.birthdate,
+          Birthdate: req.body.Birthdate,
         },
       },
       { new: true },
