@@ -12,8 +12,8 @@ passport.use(
   // passport registers this strategy, THEN it can be employed as middleware
   new LocalStrategy( // configuring the  local strategy
     {
-      Username: "Username",
-      Password: "Password",
+      Username: "username",
+      Password: "password",
     },
     // 'verify' function that takes in credentials and a callback
     (username, password, callback) => {
@@ -32,12 +32,12 @@ passport.use(
         }
 
         // validate password declared on all instances of User, in models.js
-        // if (!user.validatePassword(password)) {
-        //   console.log("invalid password");
-        //   return callback(null, false, {
-        //     message: "Invalid password",
-        //   });
-        // }
+        if (!user.validatePassword(password)) {
+          console.log("invalid password");
+          return callback(null, false, {
+            message: "Invalid password",
+          });
+        }
 
         console.log("finished");
         return callback(null, user);
