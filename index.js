@@ -23,6 +23,7 @@ const port = process.env.PORT || 8080;
 //   useUnifiedTopology: true,
 // });
 
+// enables CORs across all domains
 app.use(cors());
 
 mongoose.connect(process.env.CONNECTION_URI, {
@@ -35,18 +36,16 @@ let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
 
-// enables CORs across all domains
-
-// passport strategies and /login JWT generation
-let auth = require("./auth.js")(app);
-const passport = require("passport");
-require("./passport");
-
 // route middleware
 app.use(morgan("common", { stream: logStream }));
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// passport strategies and /login JWT generation
+let auth = require("./auth.js")(app);
+const passport = require("passport");
+require("./passport");
 
 //error handling middleware
 app.use((err, req, res, next) => {
