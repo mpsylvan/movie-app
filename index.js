@@ -5,31 +5,31 @@ const express = require("express"),
   fs = require("fs"),
   cors = require("cors");
 
-const { check, validationResult } = require("express-validator");
-
+const app = express();
 const mongoose = require("mongoose");
 const Models = require("./models.js");
+const { check, validationResult } = require("express-validator");
 
 const Movies = Models.Movie;
 const Users = Models.User;
 const Directors = Models.Director;
 const Genres = Models.Genre;
 
-const app = express();
-const port = process.env.PORT || 8080;
+mongoose.connect(process.env.CONNECTION_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // mongoose.connect("mongodb://localhost:27017/SceneStealer", {
 //   useNewUrlParser: true,
 //   useUnifiedTopology: true,
 // });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // enables CORs across all domains
 app.use(cors());
-
-mongoose.connect(process.env.CONNECTION_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
 
 // creates a write stream for morgan to log each request to the server in logs file.
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
@@ -39,8 +39,6 @@ let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
 // route middleware
 app.use(morgan("common", { stream: logStream }));
 app.use(express.static("public"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // passport strategies and /login JWT generation
 let auth = require("./auth.js")(app);
@@ -332,6 +330,7 @@ app.put(
   }
 );
 
+const port = process.env.PORT || 8080;
 app.listen(port, "0.0.0.0", () => {
   console.log(`listening on ${port}`);
 });

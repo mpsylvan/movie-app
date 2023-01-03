@@ -20,7 +20,6 @@ module.exports = (router) => {
         return res.status(400).json({
           message: "login issue detected",
           user: user,
-          error: error,
         });
       }
       req.login(user, { session: false }, (error) => {
