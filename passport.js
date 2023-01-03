@@ -32,12 +32,12 @@ passport.use(
         }
 
         // validate password declared on all instances of User, in models.js
-        if (!user.validatePassword(password)) {
-          console.log("invalid password");
-          return callback(null, false, {
-            message: "Invalid password",
-          });
-        }
+        // if (!user.validatePassword(password)) {
+        //   console.log("invalid password");
+        //   return callback(null, false, {
+        //     message: "Invalid password",
+        //   });
+        // }
 
         console.log("finished");
         return callback(null, user);
