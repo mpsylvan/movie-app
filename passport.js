@@ -16,9 +16,9 @@ passport.use(
       Password: "Password",
     },
     // 'verify' function that takes in credentials and a callback
-    (username, password, callback) => {
+    (Username, Password, callback) => {
       console.log(username + " " + password);
-      Users.findOne({ Username: username }, (err, user) => {
+      Users.findOne({ Username: Username }, (err, user) => {
         if (err) {
           console.log(err);
           return callback(err); // internal server issue, callback accepts err argument.
@@ -32,7 +32,7 @@ passport.use(
         }
 
         // validate password declared on all instances of User, in models.js
-        if (!user.validatePassword(password)) {
+        if (!user.validatePassword(Password)) {
           console.log("invalid password");
           return callback(null, false, {
             message: "Invalid password",
