@@ -16,7 +16,7 @@ let generateJWTToken = (user) => {
 module.exports = (router) => {
   router.post("/login", (req, res) => {
     passport.authenticate("local", { session: false }, (error, user, info) => {
-      if (error || !user) {
+      if (error) {
         return res.status(400).json({
           message: "login issue detected",
           user: user,
@@ -28,7 +28,7 @@ module.exports = (router) => {
           res.send(error);
         }
         let token = generateJWTToken(user.toJSON());
-        return res.json({ user, token }); // ES6 shortand for key/value sameness
+        return res.status(200).json({ user, token }); // ES6 shortand for key/value sameness
       });
     })(req, res);
   });
