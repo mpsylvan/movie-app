@@ -169,13 +169,13 @@ app.get("/users/:username", (req, res) => {
 app.post(
   "/users",
   [
-    check("username", "username is required").isLength({ min: 5 }),
+    check("Username", "username is required").isLength({ min: 5 }),
     check(
-      "username",
+      "Username",
       "username can only be made of letters and numbers"
     ).isAlphanumeric(),
-    check("password", "password is required").not().isEmpty(),
-    check("email", "valid email is required").isEmail(),
+    check("Password", "password is required").not().isEmpty(),
+    check("Email", "valid email is required").isEmail(),
   ],
   (req, res) => {
     let errors = validationResult(req);
@@ -237,13 +237,13 @@ app.put(
   "/users/:username",
   passport.authenticate("jwt", { session: false }),
   [
-    check("username", "username is required").isLength({ min: 5 }),
+    check("Username", "username is required").isLength({ min: 5 }),
     check(
-      "username",
+      "Username",
       "username can only be made of letters and numbers"
     ).isAlphanumeric(),
-    check("password", "password is required").not().isEmpty(),
-    check("email", "valid email is required").isEmail(),
+    check("Password", "password is required").not().isEmpty(),
+    check("Email", "valid email is required").isEmail(),
   ],
   (req, res) => {
     let errors = validationResult(req);
