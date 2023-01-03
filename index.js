@@ -23,6 +23,8 @@ const port = process.env.PORT || 8080;
 //   useUnifiedTopology: true,
 // });
 
+app.use(cors());
+
 mongoose.connect(process.env.CONNECTION_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -34,7 +36,6 @@ let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
 });
 
 // enables CORs across all domains
-app.use(cors());
 
 // passport strategies and /login JWT generation
 let auth = require("./auth.js")(app);
