@@ -33,29 +33,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
-let allowedOrigins = [
-  "http://localhost:8080",
-  "http://localhost:1234",
-  "http://localhost:5500",
-];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        // If a specific origin isn’t found on the list of allowed origins
-        let message =
-          "The CORS policy for this application doesn’t allow access from origin " +
-          origin;
-        return callback(new Error(message), false);
-      }
-      return callback(null, true);
-    },
-  })
-);
-// enables CORs across all domains
-// app.use(cors());
+app.use(cors());
 
 // route middleware
 app.use(morgan("common", { stream: logStream }));
