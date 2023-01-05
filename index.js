@@ -25,6 +25,7 @@ mongoose.connect(process.env.CONNECTION_URI, {
 //   useNewUrlParser: true,
 //   useUnifiedTopology: true,
 // });
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -33,8 +34,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
-
-app.use(cors());
 
 // route middleware
 app.use(morgan("common", { stream: logStream }));
@@ -66,7 +65,7 @@ app.get("/", (req, res) => {
 // get all movies
 app.get(
   "/movies",
-  // passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Movies.find()
       .then((movies) => {
