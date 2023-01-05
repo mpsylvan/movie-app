@@ -2,8 +2,9 @@ const express = require("express"),
   path = require("path"),
   morgan = require("morgan"),
   bodyParser = require("body-parser"),
-  fs = require("fs"),
-  cors = require("cors");
+  fs = require("fs");
+
+const cors = require("cors");
 
 const app = express();
 const mongoose = require("mongoose");
@@ -14,8 +15,6 @@ const Movies = Models.Movie;
 const Users = Models.User;
 const Directors = Models.Director;
 const Genres = Models.Genre;
-
-app.use(cors());
 
 mongoose.connect(process.env.CONNECTION_URI, {
   useNewUrlParser: true,
@@ -30,19 +29,40 @@ mongoose.connect(process.env.CONNECTION_URI, {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// enables CORs across all domains
-
 // creates a write stream for morgan to log each request to the server in logs file.
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
   flags: "a",
 });
+let allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:1234",
+  "http://localhost:5500",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        // If a specific origin isn’t found on the list of allowed origins
+        let message =
+          "The CORS policy for this application doesn’t allow access from origin " +
+          origin;
+        return callback(new Error(message), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
+// enables CORs across all domains
+// app.use(cors());
 
 // route middleware
 app.use(morgan("common", { stream: logStream }));
 app.use(express.static("public"));
 
 // passport strategies and /login JWT generation
-let auth = require("./auth.js")(app);
+let auth = require("./auth")(app);
 const passport = require("passport");
 require("./passport");
 
