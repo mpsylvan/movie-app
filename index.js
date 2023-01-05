@@ -15,6 +15,8 @@ const Users = Models.User;
 const Directors = Models.Director;
 const Genres = Models.Genre;
 
+app.use(cors());
+
 mongoose.connect(process.env.CONNECTION_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -29,7 +31,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // enables CORs across all domains
-app.use(cors());
 
 // creates a write stream for morgan to log each request to the server in logs file.
 let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
