@@ -295,7 +295,10 @@ app.post(
       { new: true }
     )
       .then((updatedUser) =>
-        res.status(201).send(`${updatedUser.Username}'s favorites updated.`)
+        res.status(201).json({
+          message: "sucessfully added movie",
+          newUser: updatedUser,
+        })
       )
       .catch((err) => res.status(500).send("error:" + err));
   }
@@ -322,7 +325,7 @@ app.put(
         } else {
           res.status(201).json({
             message: "user favorites updated successfully.",
-            newFavorites: updatedUser.FavoriteMovies,
+            newUser: updatedUser,
           });
         }
       }
