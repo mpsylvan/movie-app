@@ -320,9 +320,10 @@ app.put(
         if (err) {
           res.status(500).send("error" + err);
         } else {
-          res
-            .status(200)
-            .send(`Movie deleted from ${updatedUser.Username}'s favorites.`);
+          res.status(201).json({
+            message: "user favorites updated successfully.",
+            newFavorites: updatedUser.FavoriteMovies,
+          });
         }
       }
     );
