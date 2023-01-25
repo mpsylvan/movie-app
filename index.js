@@ -241,7 +241,9 @@ app.put(
       "Username",
       "username can only be made of letters and numbers"
     ).isAlphanumeric(),
-    check("Password", "password is required").not().isEmpty(),
+    check("Password", "password needs to be 8 characters long.").isLength({
+      min: 8,
+    }),
     check("Email", "valid email is required").isEmail(),
   ],
   (req, res) => {
