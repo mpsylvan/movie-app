@@ -33,6 +33,7 @@ let allowedOrigins = [
   "http://localhost:4200",
   "https://scenestealer.netlify.app",
   "https://mpsylvan.github.io/scenestealer-angular-client",
+  "https://mpsylvan.github.io/",
 ];
 
 app.use(
