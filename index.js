@@ -195,7 +195,7 @@ app.get("/users/:username", (req, res) => {
 app.post(
   "/users",
   [
-    check("Username", "username is required").isLength({ min: 5 }),
+    check("Username", "username required").isLength({ min: 5 }),
     check(
       "Username",
       "Username can only be made of letters and numbers"
