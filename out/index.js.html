@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const express = require("express"),
+  path = require("path"),
+  morgan = require("morgan"),
+  bodyParser = require("body-parser"),
+  fs = require("fs");
+
+const cors = require("cors");
+
+const app = express();
+const mongoose = require("mongoose");
+const Models = require("./models.js");
+const { check, validationResult } = require("express-validator");
+
+const Movies = Models.Movie;
+const Users = Models.User;
+const Directors = Models.Director;
+const Genres = Models.Genre;
+
+mongoose.connect(process.env.CONNECTION_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+// mongoose.connect("mongodb://localhost:27017/SceneStealer", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+let allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:1234",
+  "http://localhost:5500",
+  "http://localhost:4200",
+  "https://scenestealer.netlify.app",
+  "https://mpsylvan.github.io/scenestealer-angular-client",
+  "https://mpsylvan.github.io/",
+];
+
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         // If a specific origin isn’t found on the list of allowed origins
+//         let message =
+//           "The CORS policy for this application doesn’t allow access from origin " +
+//           origin;
+//         return callback(new Error(message), false);
+//       }
+//       return callback(null, true);
+//     },
+//   })
+// );
+
+app.use(cors());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// creates a write stream for morgan to log each request to the server in logs file.
+let logStream = fs.createWriteStream(path.join(__dirname, "logs.txt"), {
+  flags: "a",
+});
+
+// route middleware
+app.use(morgan("common", { stream: logStream }));
+app.use(express.static("public"));
+
+// passport strategies and /login JWT generation
+let auth = require("./auth")(app);
+const passport = require("passport");
+require("./passport");
+// customized error handling function on server side issues.
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("Something broken in application");
+});
+
+// ******* API Endpoints and request handlers *******
+
+//documentation page
+app.get("/documentation.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "documentation.html"));
+});
+
+// home page
+app.get("/", (req, res) => {
+  res.send("Welcome to the SceneStealer Database!");
+});
+
+/**
+ * retrieves an array of all movie documents within the database.
+ * @name getMovies
+ * @function
+ * @global
+ * @param {string} route - the route
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {Array}
+ */
+app.get(
+  "/movies",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Movies.find()
+      .then((movies) => {
+        res.status(201).json(movies);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send(`Error: ${error}`);
+      });
+  }
+);
+
+/**
+ * retrieves a movie object that matches the query constructed from the movie title url parameter.
+ * @name getSingleMovie
+ * @function
+ * @global
+ * @param {string} route - the route including movie title
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {object}
+ */
+app.get(
+  "/movies/:name",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Movies.findOne({ Name: req.params.name })
+      .then((movie) => {
+        if (!movie) {
+          res.status(400).send(`no movie named ${req.params.name}`);
+        } else {
+          res.status(200).json(movie);
+        }
+      })
+      .catch((err) => {
+        res.status(404).send("error: " + err);
+      });
+  }
+);
+
+/**
+ * retrieves an array of all genre documents from the genre collection.
+ * @name getGenres
+ * @function
+ * @global
+ * @param {string} route - the route
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {Array}
+ */
+app.get(
+  "/genres",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Genres.find()
+      .then((genres) => res.status(200).json(genres))
+      .catch((err) => res.status(500).send("Error:" + err));
+  }
+);
+
+/**
+ * retrieves a movie object that matches the query constructed from the movie title url parameter.
+ * @name getSingleGenre
+ * @function
+ * @global
+ * @param {string} route - the route built including genre name.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {object}
+ */
+app.get(
+  "/genres/:genre",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Genres.findOne({ Name: req.params.genre }).then((genre) => {
+      if (!genre) {
+        res.status(404).send("genre not found");
+      } else {
+        res.status(201).json(genre);
+      }
+    });
+  }
+);
+
+/**
+ * retrieves an array of all director documents within the Directors collection.
+ * @name getDirectors
+ * @function
+ * @global
+ * @param {string} route - the route
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {Array}
+ */
+app.get(
+  "/directors",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Directors.find()
+      .then((directors) => res.status(200).json(directors))
+      .catch((err) => res.status(500).send("Error: " + err));
+  }
+);
+/**
+ * retrieves a director object that matches the query constructed using director name in the url parameter.
+ * @name getSingleDirector
+ * @function
+ * @global
+ * @param {string} route - the route built including director name.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {object}
+ */
+app.get(
+  "/directors/:name",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Directors.findOne({ Name: req.params.name })
+      .then((match) => {
+        if (!match) {
+          res.status(404).send(`Director named ${req.params.name} not found.`);
+        } else {
+          res.status(201).json(match);
+        }
+      })
+      .catch((err) => res.status(500).send(`error: ${err}`));
+  }
+);
+/**
+ * retrieves an array of all user documents within the Users collection.
+ * @name getUsers
+ * @function
+ * @global
+ * @param {string} route - the route
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {Array}
+ */
+app.get(
+  "/users",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Users.find()
+      .then((users) => res.status(201).json(users))
+      .catch((err) => res.send("error: " + err));
+  }
+);
+/**
+ * retrieves a director object that matches the query constructed using director name in the url parameter.
+ * @name getSingleUser
+ * @function
+ * @global
+ * @param {string} route - the route built including user's username.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - executes db query annd returns results.
+ * @returns {object}
+ */
+app.get("/users/:username", (req, res) => {
+  passport.authenticate("jwt", { session: false }),
+    Users.findOne({ Username: req.params.username })
+      .then((user) => res.json(user))
+      .catch((err) => res.send("error  : " + err));
+});
+
+/**
+ * posts a new user into the db when provided valid user inputs
+ * @name addNewUser
+ * @function
+ * @global
+ * @param {string} route - the route
+ * @param {array} validator_methods - array of express-validator check methods.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - confirms valid inputs, hashes password, confirms no existing conflict and creates user in db.
+ * @returns {object} - response with success message and the newly created user.
+ */
+app.post(
+  "/users",
+  [
+    check("Username", "username required").isLength({ min: 5 }),
+    check(
+      "Username",
+      "Username can only be made of letters and numbers"
+    ).isAlphanumeric(),
+    check("Password", "password is required").not().isEmpty(),
+    check("Email", "valid email is required").isEmail(),
+  ],
+  (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    let hashedPassword = Users.hashPassword(req.body.Password); //  hashed form of password field of req body, static method declared in models.js
+    Users.findOne({ Username: req.body.Username })
+      .then((user) => {
+        if (user) {
+          res.status(400).send(`'${req.body.Username}' already exists.`);
+        } else {
+          Users.create({
+            Email: req.body.Email,
+            Password: hashedPassword, //  stores the hashed form
+            Username: req.body.Username,
+            Birthdate: req.body.Birthdate,
+          })
+            .then((user) => {
+              res.status(201).json({
+                message: "Account successfully created",
+                user: user,
+              });
+            })
+            .catch((error) => {
+              res.status(500).send("Error: " + error);
+            });
+        }
+      })
+      .catch((error) => {
+        res.status(500).send("Error: " + error);
+      });
+  }
+);
+
+/**
+ * deletes a user from the db when provided an existing username match.
+ * @name deleteUser
+ * @function
+ * @global
+ * @param {string} route - the route built with username included in the url param.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - attempts to match username in url param to a db document, if found, deletes document.
+ * @returns {string} - success or failure response.
+ */
+app.delete(
+  "/users/:username",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Users.findOneAndRemove({ Username: req.params.username })
+      .then((user) => {
+        if (!user) {
+          res.status(400).send(`${req.params.username} was not found.`);
+        } else {
+          res.status(200).send(`${req.params.username} has been removed.`);
+        }
+      })
+      .catch((err) => {
+        res.status(500).send("error: " + err);
+      });
+  }
+);
+
+/**
+ * puts an updated user into the db by matching for username.
+ * @name updateUser
+ * @function
+ * @global
+ * @param {string} route - the route including the username in url param.
+ * @param {array} validator_methods - array of express-validator check methods.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - confirms valid inputs, hashes password, finds db document and updates with new info.
+ * @returns {object} - object with response message and the updated user object.
+ */
+app.put(
+  "/users/:username",
+  passport.authenticate("jwt", { session: false }),
+  [
+    check("Username", "username is required").isLength({ min: 5 }),
+    check(
+      "Username",
+      "username can only be made of letters and numbers"
+    ).isAlphanumeric(),
+    check("Password", "password needs to be 8 characters long.").isLength({
+      min: 8,
+    }),
+    check("Email", "valid email is required").isEmail(),
+  ],
+  (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    let hashedPassword = Users.hashPassword(req.body.Password);
+    Users.findOneAndUpdate(
+      { Username: req.params.username },
+      {
+        $set: {
+          Username: req.body.Username,
+          Email: req.body.Email,
+          Password: hashedPassword,
+          Birthdate: req.body.Birthdate,
+        },
+      },
+      { new: true },
+      (err, newUser) => {
+        if (err) {
+          res.status(500).send("Error " + err);
+        }
+        if (!newUser) {
+          res
+            .status(401)
+            .send(
+              `${req.params.username} not found, make sure username entered correctly.`
+            );
+        } else {
+          res.status(201).json({
+            message: "User Updated Sucessfully",
+            newUser: newUser,
+          });
+        }
+      }
+    );
+  }
+);
+
+/**
+ * adds a new movie to a user's favorites list.
+ * @name addMovieToFavorites
+ * @function
+ * @global
+ * @param {string} route - the route including unique username and movie ID strings.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - finds the user via username match and updates the FavoriteMovies attribute.
+ * @returns {object} - object with response message and the updated user object.
+ */
+app.post(
+  "/users/:username/favorites/:movieID",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Users.findOneAndUpdate(
+      { Username: req.params.username },
+      { $addToSet: { FavoriteMovies: req.params.movieID } },
+      { new: true }
+    )
+      .then((updatedUser) =>
+        res.status(201).json({
+          message: "sucessfully added movie",
+          newUser: updatedUser,
+        })
+      )
+      .catch((err) => res.status(500).send("error:" + err));
+  }
+);
+
+app.get("/directors", (req, res) => {
+  Directors.find()
+    .then((directors) => res.status(200).json(directors))
+    .catch((err) => res.status(500).send("error: " + err));
+});
+
+/**
+ * removes a movie from a user's favorites list.
+ * @name removeMovieFromFavorites
+ * @function
+ * @global
+ * @param {string} route - the route including unique username and movie ID strings.
+ * @param {method} authenticator - passport authenticator
+ * @param {function} callback - finds the user via username match and updates the FavoriteMovies attribute.
+ * @returns {object} - object with response message and the updated user object.
+ */
+app.put(
+  "/users/:username/favorites/:movieID",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Users.findOneAndUpdate(
+      { Username: req.params.username },
+      { $pull: { FavoriteMovies: req.params.movieID } },
+      { new: true },
+      (err, updatedUser) => {
+        if (err) {
+          res.status(500).send("error" + err);
+        } else {
+          res.status(201).json({
+            message: "user favorites updated successfully.",
+            newUser: updatedUser,
+          });
+        }
+      }
+    );
+  }
+);
+
+const port = process.env.PORT || 8080;
+app.listen(port, "0.0.0.0", () => {
+  console.log(`listening on ${port}`);
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addMovieToFavorites">addMovieToFavorites</a></li><li><a href="global.html#addNewUser">addNewUser</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#getDirectors">getDirectors</a></li><li><a href="global.html#getGenres">getGenres</a></li><li><a href="global.html#getMovies">getMovies</a></li><li><a href="global.html#getSingleDirector">getSingleDirector</a></li><li><a href="global.html#getSingleGenre">getSingleGenre</a></li><li><a href="global.html#getSingleMovie">getSingleMovie</a></li><li><a href="global.html#getSingleUser">getSingleUser</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#removeMovieFromFavorites">removeMovieFromFavorites</a></li><li><a href="global.html#updateUser">updateUser</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Apr 14 2023 14:46:58 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
